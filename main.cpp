@@ -11,7 +11,11 @@
 #include <imgui_stdlib.h>
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <cstdlib>
+#include <locale>
+#include <codecvt>
 #include <string>
 #include <unordered_map>
 #include <chrono>
@@ -40,9 +44,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     int secondsOnlineDuration = 0;
     std::string password;
     bool is_init = false;
-    const std::unordered_map<std::string, std::string> user_passwords = {
-        #include "pw_config.inc"
+    const std::unordered_map<std::wstring, std::string> user_passwords = {
+        //#include "pw_config.inc"
     };
+
+    // Buffer for the username is initialized here for debug purposes
+    wchar_t username[UNLEN + 1];
+    DWORD username_len = UNLEN + 1;
+    GetUserNameW(username, &username_len);
 
     // Enter window reopen loop >:)
     for(;;)
@@ -110,6 +119,33 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                 ImGui::InputText("Password", &password);
                 if(ImGui::Button("Submit"))
                 {
+                    // Output some debug info
+                    /*
+                    {
+                        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                        std::wstringstream ss;
+                        ss << "Value of user_passwords hashmap:\n";
+                        for(const auto& user_password : user_passwords)
+                        {
+                            ss << '\t' << std::quoted(user_password.first)
+                               << ": " << std::quoted(converter.from_bytes(user_password.second.c_str())) << '\n';
+                        }
+                        ss << "\nsecondsOnlineDuration: " << secondsOnlineDuration << '\n';
+                        ss << "is_init: " << std::boolalpha << is_init << std::noboolalpha << '\n';
+                        ss << "username: " << std::quoted(username) << '\n';
+                        ss << "password: " << std::quoted(converter.from_bytes(password.c_str())) << '\n';
+                        std::wstring str = ss.str();
+                        std::thread([str]{
+                            MessageBoxW(
+                                NULL,
+                                str.c_str(),
+                                L"Debug info",
+                                MB_OK | MB_ICONINFORMATION
+                            );
+                        }).detach();
+                    }
+                    */
+
                     if(secondsOnlineDuration < 0)
                     {
                         //auto temp = std::async(std::launch::async, []{
@@ -123,9 +159,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
                         goto EndImGuiWindow;
                     }
 
-                    char username[UNLEN + 1];
-                    DWORD username_len = UNLEN + 1;
-                    GetUserName(username, &username_len);
                     try
                     {
                         if(user_passwords.at(username) != password)
