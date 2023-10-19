@@ -226,7 +226,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     }
 
     std::this_thread::sleep_until(shutdown_timepoint);
-    system("shutdown /s /t 0");
+    system("shutdown /s /f /t 0");
 
     return 0;
 }
