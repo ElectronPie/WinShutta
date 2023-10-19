@@ -45,7 +45,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     std::string password;
     bool is_init = false;
     const std::unordered_map<std::wstring, std::string> user_passwords = {
-        //#include "pw_config.inc"
+        #include "pw_config.inc"
     };
 
     // Buffer for the username is initialized here for debug purposes
