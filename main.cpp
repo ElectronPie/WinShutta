@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <thread>
-#include <future>
+//#include <future>
 
 namespace chr = std::chrono;
 using namespace std::chrono_literals;
@@ -116,7 +116,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             {
                 ImGui::Begin("Input Requested");
                 ImGui::InputInt("Seconds before shutdown", &secondsOnlineDuration);
-                ImGui::InputText("Password", &password);
+                ImGui::InputText("Password", &password, ImGuiInputTextFlags_Password);
                 if(ImGui::Button("Submit"))
                 {
                     // Output some debug info
@@ -212,18 +212,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     auto shutdown_timepoint = now + chr::seconds(secondsOnlineDuration);
     auto warning_timepoint  = shutdown_timepoint - 10min;
 
-    if(warning_timepoint > now)
-    {
-        std::this_thread::sleep_until(warning_timepoint);
-        auto temp = std::async(std::launch::async, []{
-            MessageBox(
-                NULL,
-                "Your time is up in 10 minutes!",
-                "Warning!",
-                MB_OK | MB_ICONWARNING
-            );
-        });
-    }
+    std::this_thread::sleep_until(warning_timepoint);
+    std::thread([]{
+        MessageBox(
+            NULL,
+            "Your time is up in 10 minutes!",
+            "Warning!",
+            MB_OK | MB_ICONWARNING
+        );
+    }).detach();
 
     std::this_thread::sleep_until(shutdown_timepoint);
     system("shutdown /s /f /t 0");
